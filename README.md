@@ -5,7 +5,7 @@ OAuth2 Simple Client
 [![Coverage Status](https://coveralls.io/repos/StukiOrg/oauth2-simple-client/badge.png)](https://coveralls.io/r/StukiOrg/oauth2-simple-client)
 [![Total Downloads](https://poser.pugx.org/stuki/oauth2-simple-client/downloads.png)](https://packagist.org/packages/stuki/oauth2-simple-client)
 
-This OAuth2 client is a simply better way to use OAuth2 in your application.  
+This OAuth2 client is a simply better way to use OAuth2 in your application.
 
 
 Included Providers
@@ -29,7 +29,7 @@ OAuth2 Simple Client is a fork of the popular [league/oauth2-client](https://git
 Beyond unit testing this library is tested against each provider manually [using StukiOrg/oauth2-simple-client-test](https://github.com/StukiOrg/oauth2-simple-client-test), a complete testing framework application.
 
 
-Installation 
+Installation
 ------------
 
 ```sh
@@ -37,43 +37,45 @@ $ php composer.phar require stuki/oauth2-simple-client dev-master
 ```
 
 
-Use
----
+ZF2 Example
+-----------
 
 ```php
 use Stuki\OAuth2\Client;
 
-$provider = new Client\Provider\<ProviderName>(array(
-    'clientId'  =>  'id',
-    'clientSecret'  =>  'secret',
-    'redirectUri'   =>  'https://your-registered-redirect-uri/'
-));
+    public function LoginAction()
+    {
+        $config = $this->getServiceLocator()->get('Config');
 
-if ( ! isset($_GET['code'])) {
-    // No authorization code; send user to get one
-    // Some providers support and/or require an application state token
-    header('Location: ' . $provider->getAuthorizationUrl(array('state' => 'token'));
-    exit;
-} else {
-    try {
-        // Get an authorization token
-        $token = $provider->getAccessToken('authorization_code', [
-            'code' => $_GET['code'],
-        ]);
-    } catch (Client\Exception\IDPException as IDPException) {
-        // Handle error from oauth2 server
-    } catch (\Exception $e) {
-        die('handle exception');
+        $provider = new Client\Provider\Meetup(array(
+            'clientId' => $config['meetup']['key'],
+            'clientSecret' => $config['meetup']['secret'],
+            'redirectUri' => $config['meetup']['redirect'],
+        ));
+
+        if ( ! $this->params()->fromQuery('code')) {
+            // No authorization code; send user to get one
+            // Some providers support and/or require an application state token
+            return $this->plugin('redirect')->toUrl($provider->getAuthorizationUrl(array('state' => 'token')));
+        } else {
+            try {
+                // Get an authorization token
+                $token = $provider->getAccessToken('authorization_code', [
+                    'code' => $_GET['code'],
+                ]);
+            } catch (Client\Exception\IDPException $e) {
+                // Handle error from oauth2 server
+            }
+
+            // Store the access and refresh token for future use
+            $container = new Container('oauth2');
+            $container->accessToken = $token->accessToken;
+            $container->refreshToken = $token->refreshToken;
+
+            // Redirect to save session
+            return $this->plugin('redirect')->toRoute('member');
+        }
     }
-
-    // Store the access token for future use 
-    // See Stuki\OAuth2\Client\Token\AccessToken for all returned properites
-    $SESSION['oauth']['access_token'] = $token->access_token;
-
-    // Some user details are provided through the client
-    // See Stuki\OAuth2\Client\Entity\User
-    $userDetails = $provider->getUserDetails($token);
-}
 ```
 
 Refresh a Token

@@ -248,13 +248,14 @@ abstract class AbstractProvider
         $url = $this->urlUserDetails($token);
 
         try {
-
             $client = $this->getHttpClient();
             $client->setBaseUrl($url);
 
+            $headers = ['Authorization' => ' Bearer ' . $token->accessToken];
             if ($this->headers) {
-                $client->setDefaultOption('headers', $this->headers);
+                $headers = array_merge($this->headers, $headers);
             }
+            $client->setDefaultOption('headers', $headers);
 
             $request = $client->get()->send();
             $response = $request->getBody();
