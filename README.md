@@ -93,3 +93,6 @@ $provider = new Client\Provider\<ProviderName>(array(
 $grant = new Client\Grant\RefreshToken();
 $token = $provider->getAccessToken($grant, ['refresh_token' => $refreshToken]);
 ```
+### ACKNOWLEDGEMENTS
+
+StukiOrg would like to thank all the [contributors](https://github.com/StukiOrg/oauth2-simple-client/contributors) to this repository.
