@@ -25,7 +25,7 @@ Included Providers
 About
 -----
 
-This is a break-away fork and this is the offical repository for oauth2-simple-client.
+This is a hard fork of ThePHPLeague/oauth-client and this is the offical repository for StukiOrg/oauth2-simple-client.
 
 This simple client implements a well architected solution for OAuth2 authentication.  Contributions are accepted for new OAuth2 adapters if you choose to share.
 
