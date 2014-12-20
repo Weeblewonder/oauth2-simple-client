@@ -1,25 +1,30 @@
 <?php
 
-namespace StukiTest\OAuth2\Client\Test\Provider;
+namespace StukiTest\OAuth2\Client\Provider;
 
 use \Mockery as m;
 
-class MicrosoftTest extends \PHPUnit_Framework_TestCase
+class MeetupTest extends \PHPUnit_Framework_TestCase
 {
     protected $provider;
 
     protected function setUp()
     {
-        $this->provider = new \Stuki\OAuth2\Client\Provider\Microsoft(array(
+        $this->provider = new \Stuki\OAuth2\Client\Provider\Meetup(array(
             'clientId' => 'mock_client_id',
             'clientSecret' => 'mock_secret',
             'redirectUri' => 'none',
         ));
     }
 
+    protected function tearDown()
+    {
+#        m::close();
+    }
+
     public function testAuthorizationUrl()
     {
-        $url = $this->provider->getAuthorizationUrl();
+        $url = $this->provider->getAuthorizationUrl(array('state' => 'applicationState'));
         $uri = parse_url($url);
         parse_str($uri['query'], $query);
 
@@ -35,13 +40,13 @@ class MicrosoftTest extends \PHPUnit_Framework_TestCase
         $url = $this->provider->urlAccessToken();
         $uri = parse_url($url);
 
-        $this->assertEquals('/token', $uri['path']);
+        $this->assertEquals('/oauth2/access', $uri['path']);
     }
 
     public function testGetAccessToken()
     {
         $response = m::mock('Guzzle\Http\Message\Response');
-        $response->shouldReceive('getBody')->times(1)->andReturn('{"access_token": "mock_access_token", "expires_in": 3600, "refresh_token": "mock_refresh_token", "uid": 1}');
+        $response->shouldReceive('getBody')->times(1)->andReturn('{"access_token": "mock_access_token", "expires": 3600, "refresh_token": "mock_refresh_token", "uid": 1}');
 
         $client = m::mock('Guzzle\Service\Client');
         $client->shouldReceive('setBaseUrl')->times(1);
@@ -49,8 +54,6 @@ class MicrosoftTest extends \PHPUnit_Framework_TestCase
         $this->provider->setHttpClient($client);
 
         $token = $this->provider->getAccessToken('authorization_code', array('code' => 'mock_authorization_code'));
-
-#    print_r($token);die();
 
         $this->assertEquals('mock_access_token', $token->accessToken);
         $this->assertEquals(3600, $token->expires_in);
@@ -60,17 +63,16 @@ class MicrosoftTest extends \PHPUnit_Framework_TestCase
 
     public function testScopes()
     {
-        $this->assertEquals(array('wl.basic', 'wl.emails'), $this->provider->getScopes());
+        $this->assertEquals(array(), $this->provider->getScopes());
     }
 
     public function testUserData()
     {
         $postResponse = m::mock('Guzzle\Http\Message\Response');
-        $postResponse->shouldReceive('getBody')->times(1)->andReturn('{"access_token": "mock_access_token", "expires_in": 3600, "refresh_token": "mock_refresh_token", "uid": 1}');
+        $postResponse->shouldReceive('getBody')->times(1)->andReturn('{"access_token": "mock_access_token", "expires": 3600, "refresh_token": "mock_refresh_token", "uid": 1}');
 
         $getResponse = m::mock('Guzzle\Http\Message\Response');
-        $getResponse->shouldReceive('getBody')->times(1)->andReturn('{"id": 12345, "name": "mock_name", "first_name": "mock_first_name", "last_name": "mock_last_name", "emails": {"preferred": "mock_email"}, "link": "mock_link"}');
-        $getResponse->shouldReceive('getInfo')->andReturn(array('url' => 'mock_image_url'));
+        $getResponse->shouldReceive('getBody')->times(1)->andReturn('{"id": 12345, "login": "mock_login", "name": "mock_name", "email": "mock_email", "avatar_url": "mock_imageUrl"}');
 
         $client = m::mock('Guzzle\Service\Client');
         $client->shouldReceive('setBaseUrl')->times(1);
@@ -84,9 +86,8 @@ class MicrosoftTest extends \PHPUnit_Framework_TestCase
         $user = $this->provider->getUserDetails($token);
 
         $this->assertEquals(12345, $this->provider->getUserUid($token));
-        $this->assertEquals(array('mock_first_name', 'mock_last_name'), $this->provider->getUserScreenName($token));
+        $this->assertEquals('mock_name', $this->provider->getUserScreenName($token));
         $this->assertEquals('mock_email', $this->provider->getUserEmail($token));
         $this->assertEquals('mock_email', $user->email);
-        $this->assertEquals('mock_image_url', $user->imageUrl);
     }
 }

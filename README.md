@@ -11,14 +11,15 @@ This OAuth2 client is a simply better way to use OAuth2 in your application.
 Included Providers
 ------------------
 
-- Google
+- Box
+- Eventbrite
 - Facebook
 - Github
-- Microsoft
-- LinkedIn
-- Box
+- Google
 - Instagram
-- Eventbrite
+- LinkedIn
+- Meetup
+- Microsoft
 
 
 About

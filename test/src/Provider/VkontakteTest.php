@@ -2,7 +2,8 @@
 
 namespace Stuki\OAuth2\Client\Test\Provider;
 
-use \Mockery as m;
+use Stuki\OAuth2\Client\Provider\Vkontakte;
+use Mockery as m;
 
 class VkontakteTest extends \PHPUnit_Framework_TestCase
 {
@@ -10,7 +11,7 @@ class VkontakteTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->provider = new \Stuki\OAuth2\Client\Provider\Vkontakte(array(
+        $this->provider = new Vkontakte(array(
             'clientId' => 'mock_client_id',
             'clientSecret' => 'mock_secret',
             'redirectUri' => 'none',
@@ -74,6 +75,8 @@ class VkontakteTest extends \PHPUnit_Framework_TestCase
         $client->shouldReceive('setBaseUrl')->times(1);
         $client->shouldReceive('post->send')->times(1)->andReturn($postResponse);
         $client->shouldReceive('get->send')->times(1)->andReturn($getResponse);
+        $client->shouldReceive('getDefaultOption');
+        $client->shouldReceive('setDefaultOption');
         $this->provider->setHttpClient($client);
 
         $token = $this->provider->getAccessToken('authorization_code', array('code' => 'mock_authorization_code'));

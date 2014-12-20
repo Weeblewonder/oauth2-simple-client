@@ -74,6 +74,8 @@ class GithubTest extends \PHPUnit_Framework_TestCase
         $client->shouldReceive('setBaseUrl')->times(1);
         $client->shouldReceive('post->send')->times(1)->andReturn($postResponse);
         $client->shouldReceive('get->send')->times(1)->andReturn($getResponse);
+        $client->shouldReceive('getDefaultOption');
+        $client->shouldReceive('setDefaultOption');
         $this->provider->setHttpClient($client);
 
         $token = $this->provider->getAccessToken('authorization_code', array('code' => 'mock_authorization_code'));
