@@ -94,3 +94,4 @@ $provider = new Client\Provider\<ProviderName>(array(
 $grant = new Client\Grant\RefreshToken();
 $token = $provider->getAccessToken($grant, ['refresh_token' => $refreshToken]);
 ```
+
